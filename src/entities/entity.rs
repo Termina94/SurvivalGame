@@ -15,23 +15,9 @@ pub trait Entity {
     fn get_id(&self) -> Uuid;
     fn get_position(&self) -> Point;
     fn get_bounds(&self) -> Dimensions;
-    fn get_hitbox(&self) -> [f64; 4] {
-        let Point { x, y } = self.get_position();
-        let Dimensions { width, height } = self.get_bounds();
 
-        [x - (width / 2.0), y - (height / 2.0), width, height]
-    }
     fn update(&mut self, args: &UpdateArgs, state: &mut Level);
     fn render(&mut self, args: &RenderArgs, state: &mut Level, gl: &mut GlGraphics);
-
-    fn draw_hitboxes(&mut self, transform: Matrix2d, gl: &mut GlGraphics) {
-        let Point { x, y } = self.get_position();
-
-        // center dot
-        rectangle(RED, [x - 2.0, y - 2.0, 4.0, 4.0], transform, gl);
-        // Collision box
-        draw_rect(GREEN, self.get_hitbox(), transform, gl);
-    }
 }
 
 pub trait Controllable: Entity {
@@ -57,10 +43,19 @@ pub trait Collidable: Entity {
         x1 < x2 + width2 && x1 + width1 > x2 && y1 < y2 + height2 && height1 + y1 > y2
     }
 
-    // fn get_hitbox(&self) -> [f64; 4] {
-    //     let Point { x, y } = self.get_position();
-    //     let Dimensions { width, height } = self.get_bounds();
+    fn get_hitbox(&self) -> [f64; 4] {
+        let Point { x, y } = self.get_position();
+        let Dimensions { width, height } = self.get_bounds();
 
-    //     [x, y, width, height]
-    // }
+        [x - (width / 2.0), y - (height / 2.0), width, height]
+    }
+
+    fn draw_hitboxes(&mut self, transform: Matrix2d, gl: &mut GlGraphics) {
+        let Point { x, y } = self.get_position();
+
+        // center dot
+        rectangle(RED, [x - 2.0, y - 2.0, 4.0, 4.0], transform, gl);
+        // Collision box
+        draw_rect(GREEN, self.get_hitbox(), transform, gl);
+    }
 }

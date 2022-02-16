@@ -69,8 +69,6 @@ impl Entity for Enemy {
 
         self.pos.y += (self.y_velocity * self.speed) * args.dt;
         self.pos.x += (self.x_velocity * self.speed) * args.dt;
-
-        self.sprite.rect(square(self.pos.x, self.pos.y, 5.0));
     }
 
     fn render(self: &mut Enemy, args: &RenderArgs, state: &mut Level, gl: &mut GlGraphics) {

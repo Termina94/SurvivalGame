@@ -25,6 +25,7 @@ pub struct Dimensions {
     pub width: f64,
     pub height: f64,
 }
+
 impl Dimensions {
     pub fn new<T: Into<f64>>(width: T, height: T) -> Self {
         Self {
