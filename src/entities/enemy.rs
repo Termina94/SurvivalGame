@@ -4,7 +4,7 @@ use crate::{
     tools::helpers::{Dimensions, Point},
     Level,
 };
-use graphics::{image, rectangle::square, Image, Transformed};
+use graphics::{image, Image, Transformed};
 use opengl_graphics::GlGraphics;
 use piston::{RenderArgs, UpdateArgs};
 use uuid::Uuid;
