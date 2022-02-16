@@ -1,0 +1,3 @@
+# SurvivalGame
+
+cargo make dev
