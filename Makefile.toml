@@ -1,0 +1,23 @@
+[tasks.dev]
+command = "cargo"
+args = ["watch", "-s", "cargo make build-open"]
+
+[tasks.build-open]
+dependencies = [
+    "format",
+    "build",
+    "start"
+]
+
+[tasks.format]
+command = "cargo"
+args = ['fmt']
+
+[tasks.build]
+env = { RUST_LOG = "debug"}
+command = "cargo"
+args = ["build"]
+
+[tasks.start]
+command = "./target/debug/game.exe"
+
