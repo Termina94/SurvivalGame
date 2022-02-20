@@ -12,7 +12,7 @@ pub struct Point {
 }
 
 impl Point {
-    pub fn new<T: Into<f64>>(x: T, y: T) -> Self {
+    pub fn from<T: Into<f64>>(x: T, y: T) -> Self {
         Self {
             x: x.into(),
             y: y.into(),

@@ -2,7 +2,7 @@ use super::{
     entity::{Collidable, Controllable, Entity},
     player::Player,
 };
-use crate::Level;
+use crate::levels::level::LevelState;
 use opengl_graphics::GlGraphics;
 use piston::{Event, RenderArgs, UpdateArgs};
 
@@ -12,7 +12,7 @@ pub struct Entities {
 }
 
 impl Entities {
-    pub fn update(&mut self, args: &UpdateArgs, state: &mut Level) {
+    pub fn update(&mut self, args: &UpdateArgs, state: &mut LevelState) {
         self.player.update(args, state);
 
         for entity in self.entities.iter_mut() {
@@ -25,7 +25,7 @@ impl Entities {
         }
     }
 
-    pub fn render(&mut self, args: &RenderArgs, state: &mut Level, gl: &mut GlGraphics) {
+    pub fn render(&mut self, args: &RenderArgs, state: &mut LevelState, gl: &mut GlGraphics) {
         self.player.render(args, state, gl);
 
         for entity in self.entities.iter_mut() {

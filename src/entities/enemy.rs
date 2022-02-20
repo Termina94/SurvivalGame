@@ -1,10 +1,13 @@
 use std::collections::HashMap;
 
 use crate::{
-    tools::helpers::{Dimensions, Point},
-    Level,
+    levels::level::LevelState,
+    tools::{
+        assets::Sprites,
+        helpers::{Dimensions, Point},
+    },
 };
-use graphics::{image, Image, Transformed};
+use graphics::{image, Transformed};
 use opengl_graphics::GlGraphics;
 use piston::{RenderArgs, UpdateArgs};
 use uuid::Uuid;
@@ -15,10 +18,10 @@ pub struct Enemy {
     pub id: Uuid,
     pub pos: Point,
     pub bounds: Dimensions,
-    pub sprite: Image,
     pub y_velocity: f64,
     pub x_velocity: f64,
     pub speed: f64,
+    pub sprite_asset_no: Sprites,
     pub colliding_entities: HashMap<Uuid, String>,
 }
 
@@ -28,10 +31,10 @@ impl Default for Enemy {
             id: Uuid::new_v4(),
             pos: Point { x: 0.0, y: 0.0 },
             bounds: Dimensions::new(22, 33),
-            sprite: Image::new(),
             speed: 50.0,
             y_velocity: 0.0,
             x_velocity: 0.0,
+            sprite_asset_no: Sprites::SKELETON,
             colliding_entities: HashMap::new(),
         }
     }
@@ -55,23 +58,27 @@ impl Entity for Enemy {
         self.bounds
     }
 
-    fn update(&mut self, args: &UpdateArgs, state: &mut Level) {
-        self.x_velocity = match self.pos.x - state.player_position.0 {
+    fn set_pos(&mut self, pos: Point) {
+        self.pos = pos
+    }
+
+    fn update(&mut self, args: &UpdateArgs, state: &mut LevelState) {
+        self.x_velocity = match self.pos.x - state.player_position.x {
             x if x > 0.0 => -1.0,
             x if x < 0.0 => 1.0,
             _ => 0.0,
         };
-        self.y_velocity = match self.pos.y - state.player_position.1 {
+        self.y_velocity = match self.pos.y - state.player_position.y {
             y if y > 0.0 => -1.0,
             y if y < 0.0 => 1.0,
             _ => 0.0,
         };
 
-        self.pos.y += (self.y_velocity * self.speed) * args.dt;
-        self.pos.x += (self.x_velocity * self.speed) * args.dt;
+        self.pos.y += self.y_velocity * (self.speed * args.dt);
+        self.pos.x += self.x_velocity * (self.speed * args.dt);
     }
 
-    fn render(self: &mut Enemy, args: &RenderArgs, state: &mut Level, gl: &mut GlGraphics) {
+    fn render(self: &mut Enemy, args: &RenderArgs, state: &mut LevelState, gl: &mut GlGraphics) {
         let Dimensions { width, height } = self.bounds;
 
         gl.draw(args.viewport(), |c, gl| {
@@ -81,7 +88,9 @@ impl Entity for Enemy {
                 .trans(self.pos.x, self.pos.y)
                 .trans(-(width / 2.0), -(height / 2.0));
 
-            image(&state.enemy_texture, box_transform, gl);
+            if let Some(sprite) = state.get_texture(&self.sprite_asset_no) {
+                image(sprite, box_transform, gl);
+            }
 
             if state.debug {
                 self.draw_hitboxes(transform, gl);

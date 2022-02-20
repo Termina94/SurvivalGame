@@ -1,6 +1,6 @@
 use crate::{
+    levels::level::LevelState,
     tools::helpers::{draw_rect, Dimensions, Point},
-    Level,
 };
 use graphics::{
     color::{GREEN, RED},
@@ -15,12 +15,17 @@ pub trait Entity {
     fn get_id(&self) -> Uuid;
     fn get_position(&self) -> Point;
     fn get_bounds(&self) -> Dimensions;
+    fn get_sprite(&self) -> Option<String> {
+        None
+    }
 
-    fn update(&mut self, args: &UpdateArgs, state: &mut Level);
-    fn render(&mut self, args: &RenderArgs, state: &mut Level, gl: &mut GlGraphics);
+    fn set_pos(&mut self, pos: Point);
+
+    fn update(&mut self, args: &UpdateArgs, state: &mut LevelState);
+    fn render(&mut self, args: &RenderArgs, state: &mut LevelState, gl: &mut GlGraphics);
 }
 
-pub trait Controllable: Entity {
+pub trait Controllable {
     fn handle_input(&mut self, e: &Event) {
         if let Some(Button::Keyboard(key)) = e.press_args() {
             self.key_down(&key);
@@ -29,8 +34,8 @@ pub trait Controllable: Entity {
             self.key_up(&key);
         }
     }
-    fn key_down(&mut self, e: &Key);
-    fn key_up(&mut self, e: &Key);
+    fn key_down(&mut self, _: &Key) {}
+    fn key_up(&mut self, _: &Key) {}
 }
 
 pub trait Collidable: Entity {
