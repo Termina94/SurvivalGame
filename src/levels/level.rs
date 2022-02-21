@@ -39,12 +39,12 @@ impl Level {
     pub fn new() -> Self {
         Self {
             state: LevelState {
-                debug: true,
+                debug: false,
                 player_position: Point::from(0, 0),
                 entity_textures: HashMap::new(),
             },
             entities: Entities {
-                player: Player::default(),
+                player: Player::new(Point::from(0, 0)),
                 entities: Vec::new(),
             },
             required_assets: vec![Sprites::PLAYER, Sprites::SKELETON],
@@ -60,14 +60,14 @@ impl Level {
     pub fn spawn_enemies(&mut self) -> &mut Self {
         let mut rng = rand::thread_rng();
 
-        self.entities.entities = (0..10)
+        self.entities.entities = (0..100)
             .collect::<Vec<u32>>()
             .iter()
             .map(|_| {
-                let enemy: Box<dyn Collidable> = Box::new(Enemy {
-                    pos: Point::from(rng.gen_range(0..1920), rng.gen_range(0..1080)),
-                    ..Default::default()
-                });
+                let enemy: Box<dyn Collidable> = Box::new(Enemy::new(Point::from(
+                    rng.gen_range(0..1920),
+                    rng.gen_range(0..1080),
+                )));
 
                 enemy
             })

@@ -1,6 +1,11 @@
+use std::collections::HashMap;
+
 use crate::{
     levels::level::LevelState,
-    tools::helpers::{draw_rect, Dimensions, Point},
+    tools::{
+        assets::Sprites,
+        helpers::{draw_rect, Dimensions, Point},
+    },
 };
 use graphics::{
     color::{GREEN, RED},
@@ -11,15 +16,43 @@ use opengl_graphics::GlGraphics;
 use piston::{Button, Event, Key, PressEvent, ReleaseEvent, RenderArgs, UpdateArgs};
 use uuid::Uuid;
 
+pub struct EntityState {
+    pub id: Uuid,
+    pub pos: Point,
+    pub bounds: Dimensions,
+    pub y_velocity: f64,
+    pub x_velocity: f64,
+    pub speed: f64,
+    pub sprite_asset_no: Sprites,
+    pub colliding_entities: HashMap<Uuid, String>,
+}
+
 pub trait Entity {
-    fn get_id(&self) -> Uuid;
-    fn get_position(&self) -> Point;
-    fn get_bounds(&self) -> Dimensions;
-    fn get_sprite(&self) -> Option<String> {
-        None
+    fn get_state(&self) -> &EntityState;
+    fn get_position(&self) -> Point {
+        self.get_state().pos
+    }
+    fn get_bounds(&self) -> Dimensions {
+        self.get_state().bounds
     }
 
-    fn set_pos(&mut self, pos: Point);
+    fn calculate_movement_vectors(self: &Self, entity2: &Point) -> Point {
+        let state = self.get_state();
+        let Point { x, y } = state.pos;
+
+        let a = x - entity2.x;
+        let b = y - entity2.y;
+        let h = (a.powi(2) + b.powi(2)).sqrt();
+        let arc = (b / h).asin();
+        let g = state.speed * arc.sin();
+        let f = (state.speed.powi(2) - g.powi(2)).sqrt();
+
+        Point::from(g, f)
+    }
+
+    fn get_settings_mut(&mut self) -> &mut EntityState;
+
+    fn set_pos(&mut self, _: Point) {}
 
     fn update(&mut self, args: &UpdateArgs, state: &mut LevelState);
     fn render(&mut self, args: &RenderArgs, state: &mut LevelState, gl: &mut GlGraphics);
@@ -39,7 +72,11 @@ pub trait Controllable {
 }
 
 pub trait Collidable: Entity {
-    fn collides(&mut self, entity: &Box<dyn Collidable>);
+    fn collides(&mut self, entity: &Box<dyn Collidable>) {
+        self.get_settings_mut()
+            .colliding_entities
+            .insert(entity.get_state().id, String::from("test"));
+    }
 
     fn does_collide(&self, entity: &Box<dyn Collidable>) -> bool {
         let [x1, y1, width1, height1] = self.get_hitbox();
