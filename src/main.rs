@@ -14,7 +14,7 @@ use levels::level::Level;
 use opengl_graphics::{GlGraphics, OpenGL};
 use piston::event_loop::{EventSettings, Events};
 use piston::input::{RenderEvent, UpdateEvent};
-use piston::window::WindowSettings;
+use piston::window::*;
 
 mod entities;
 mod levels;
@@ -32,6 +32,8 @@ fn main() {
     let mut level = Level::new();
     let mut gl = GlGraphics::new(opengl);
     let mut events = Events::new(EventSettings::new());
+
+    // let mut glyphs: GlyphCache = GlyphCache::new("assets/fonts/ww.ttf", (), TextureSettings::new()).unwrap();
 
     level
         .set_player_pos(1920 / 2, 1080 / 2)

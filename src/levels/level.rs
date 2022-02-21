@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use opengl_graphics::{GlGraphics, Texture, TextureSettings};
 use piston::{Button, Event, PressEvent, ReleaseEvent};
@@ -64,9 +64,8 @@ impl Level {
             .collect::<Vec<u32>>()
             .iter()
             .map(|_| {
-                let enemy: Box<dyn Collidable> = Box::new(Enemy::new(Point::from(
-                    rng.gen_range(0..1920),
-                    rng.gen_range(0..1080),
+                let enemy: Rc<RefCell<dyn Collidable>> = Rc::new(RefCell::new(Enemy::new(
+                    Point::from(rng.gen_range(0..1920), rng.gen_range(0..1080)),
                 )));
 
                 enemy

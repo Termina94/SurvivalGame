@@ -4,7 +4,6 @@ use graphics::{
 };
 use opengl_graphics::GlGraphics;
 use piston::{Key, RenderArgs, UpdateArgs};
-use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::{
@@ -32,7 +31,9 @@ impl Player {
                 y_velocity: 0.0,
                 x_velocity: 0.0,
                 sprite_asset_no: Sprites::PLAYER,
-                colliding_entities: HashMap::new(),
+                colliding_entities: Vec::new(),
+                hp: 500.0,
+                damage: 0.0,
             },
         }
     }
@@ -60,10 +61,22 @@ impl Entity for Player {
             false => self.state.speed,
         };
 
+        let damage: f64 = self
+            .state
+            .colliding_entities
+            .iter()
+            .map(|enemy| enemy.borrow().get_state().damage)
+            .sum();
+
+        self.damage(&damage);
+
+        println!("{}", self.state.hp);
+
         self.state.pos.x += self.state.x_velocity * speed * args.dt;
         self.state.pos.y += self.state.y_velocity * speed * args.dt;
 
         state.player_position = Point::from(self.state.pos.x, self.state.pos.y);
+        self.state.colliding_entities.clear();
     }
 
     fn render(&mut self, args: &RenderArgs, state: &mut LevelState, gl: &mut GlGraphics) {

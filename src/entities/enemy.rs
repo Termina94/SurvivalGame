@@ -8,7 +8,6 @@ use crate::{
 use graphics::{image, Transformed};
 use opengl_graphics::GlGraphics;
 use piston::{RenderArgs, UpdateArgs};
-use std::collections::HashMap;
 use uuid::Uuid;
 
 use super::entity::{Collidable, Entity, EntityState};
@@ -28,7 +27,9 @@ impl Enemy {
                 y_velocity: 0.0,
                 x_velocity: 0.0,
                 sprite_asset_no: Sprites::SKELETON,
-                colliding_entities: HashMap::new(),
+                colliding_entities: Vec::new(),
+                hp: 50.0,
+                damage: 5.0,
             },
         }
     }

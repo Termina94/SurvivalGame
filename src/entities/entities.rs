@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use super::{
     entity::{Collidable, Controllable, Entity},
     player::Player,
@@ -8,7 +10,7 @@ use piston::{Event, RenderArgs, UpdateArgs};
 
 pub struct Entities {
     pub player: Player,
-    pub entities: Vec<Box<dyn Collidable>>,
+    pub entities: Vec<Rc<RefCell<dyn Collidable>>>,
 }
 
 impl Entities {
@@ -16,12 +18,14 @@ impl Entities {
         self.player.update(args, state);
 
         for entity in self.entities.iter_mut() {
-            if self.player.does_collide(entity) {
-                self.player.collides(entity);
-                // entity.collides(&self.player);
-            }
+            if let Ok(mut enemy) = entity.try_borrow_mut() {
+                if self.player.does_collide(&*enemy) {
+                    self.player.collides(entity.clone());
+                    // entity.collides(&self.player);
+                }
 
-            entity.update(args, state);
+                enemy.update(args, state);
+            }
         }
     }
 
@@ -29,7 +33,9 @@ impl Entities {
         self.player.render(args, state, gl);
 
         for entity in self.entities.iter_mut() {
-            entity.render(args, state, gl);
+            if let Ok(mut enemy) = entity.try_borrow_mut() {
+                enemy.render(args, state, gl);
+            }
         }
     }
 }

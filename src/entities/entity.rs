@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     levels::level::LevelState,
@@ -24,7 +24,9 @@ pub struct EntityState {
     pub x_velocity: f64,
     pub speed: f64,
     pub sprite_asset_no: Sprites,
-    pub colliding_entities: HashMap<Uuid, String>,
+    pub colliding_entities: Vec<Rc<RefCell<dyn Collidable>>>,
+    pub hp: f64,
+    pub damage: f64,
 }
 
 pub trait Entity {
@@ -50,6 +52,10 @@ pub trait Entity {
         Point::from(g, f)
     }
 
+    fn damage(&mut self, amount: &f64) {
+        self.get_settings_mut().hp -= amount;
+    }
+
     fn get_settings_mut(&mut self) -> &mut EntityState;
 
     fn set_pos(&mut self, _: Point) {}
@@ -72,13 +78,11 @@ pub trait Controllable {
 }
 
 pub trait Collidable: Entity {
-    fn collides(&mut self, entity: &Box<dyn Collidable>) {
-        self.get_settings_mut()
-            .colliding_entities
-            .insert(entity.get_state().id, String::from("test"));
+    fn collides(&mut self, entity: Rc<RefCell<dyn Collidable>>) {
+        self.get_settings_mut().colliding_entities.push(entity);
     }
 
-    fn does_collide(&self, entity: &Box<dyn Collidable>) -> bool {
+    fn does_collide(&self, entity: &dyn Collidable) -> bool {
         let [x1, y1, width1, height1] = self.get_hitbox();
         let [x2, y2, width2, height2] = entity.get_hitbox();
 
